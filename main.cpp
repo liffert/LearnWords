@@ -4,7 +4,7 @@
 #include "translatorapi.h"
 #include "database.h"
 #include <chrono>
-
+#include "telegramapi.h"
 
 
 
@@ -12,12 +12,17 @@ int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
     TranslatorApi translator("TranslatorApiSettings.csv");
     Database database;
+    TelegramApi telegram("telegramkey.txt");
+    telegram.pushMessage("Hello");
+    
+    
+    
     auto startWork = std::chrono::system_clock::now();
     unsigned int counter = 10;
     const unsigned int amount = 10;
     std::chrono::time_point<std::chrono::system_clock> whenstart(std::chrono::hours(19));
     
-    while(1){
+    /*while(1){
         if(counter == amount){
             if(std::chrono::system_clock::now() >= whenstart){
                 counter = 1;
@@ -34,7 +39,7 @@ int main(int argc, char *argv[]) {
                 qDebug() << word << "\t" << translator.getReply(word);
             }
         }
-    }
+    }*/
      
     return a.exec();
 }
