@@ -12,7 +12,18 @@ TelegramApi::TelegramApi(std::string requestConfPath) {
         URL.setUrl("https://api.telegram.org/bot" + QString::fromStdString(line) + "/");
     }
     manager = new QNetworkAccessManager();
-    getUpdate();
+}
+
+QStringList TelegramApi::getUsers() const {
+    QJsonDocument doc = QJsonDocument::fromJson(getUpdate());
+    QStringList users;
+    for(int i = 0; i < doc["result"].toArray().size(); i++){
+        QString temp = QString::number(doc["result"][i]["message"]["chat"]["id"].toInt());
+        if(std::find(users.begin(), users.end(), temp) == users.end()){
+           users.push_back(temp); 
+        }
+    }
+    return users;
 }
 QByteArray TelegramApi::getRequestBody(QString chat_id, QString message) {
     QJsonObject json;
@@ -24,26 +35,24 @@ QByteArray TelegramApi::getRequestBody(QString chat_id, QString message) {
     return doc.toJson();
 }
 
-QString TelegramApi::getUpdate() {
+QByteArray TelegramApi::getUpdate() const {
     QNetworkRequest request(URL.url() + "getUpdates");
     QNetworkReply *reply = manager->post(request, "");
     
     while(!reply->isFinished()){
         qApp->processEvents();
     }
-    qDebug() << reply->readAll();
-    return QString();
+    return reply->readAll();
 }
 
 
-bool TelegramApi::pushMessage(QString message) {
+bool TelegramApi::pushMessage(QString chat_id, QString message) {
     QNetworkRequest request(URL.url() + "sendMessage");
     request.setRawHeader("Content-Type", "application/json");
-    QNetworkReply *reply = manager->post(request, getRequestBody("128819689", message));
+    QNetworkReply *reply = manager->post(request, getRequestBody(chat_id, message));
     
     while(reply->isFinished()){
         qApp->processEvents();
     }
-    qDebug() << reply->readAll();
     return true;
 }

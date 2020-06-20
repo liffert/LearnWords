@@ -6,12 +6,13 @@
 class TelegramApi {
 private:
     QNetworkAccessManager *manager;
-    QByteArray getRequestBody(QString char_id, QString message);
+    QByteArray getRequestBody(QString chat_id, QString message);
     QUrl URL;
-    QString getUpdate();
+    QByteArray getUpdate() const;
     
 public:
     TelegramApi(std::string requestConfPath);
-    bool pushMessage(QString message);
+    QStringList getUsers() const;
+    bool pushMessage(QString chat_id, QString message);
 };
 

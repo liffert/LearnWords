@@ -7,26 +7,23 @@ private:
         QString word;
         int id;
         bool learned;
-};
+    };
 public:
+    const QString tablePref = "T";
+    QStringList getTables() const;
     using Word = struct wordline;
 private:
     QSqlDatabase db;
 public:
-    Word selectDidntLearn();
+    Word selectDidntLearn(QString table);
+    QString getWord(QString table);   
 private:
-    void insert(int id, QString word, bool learned);
+    void insert(int id, QString word, bool learned, QString table);
     QString databaseName = "db.LearnWordsBase";
     QString filename = "data.txt";
-    
-public:
-    QString getWord();   
-private:
-    void checkLearned(int id);
-    void create();
-
-    
-public:
+    void checkLearned(int id, QString table);    
+public:   
+    void createTable(QString name);
     void selectAll();
     Database();
 };

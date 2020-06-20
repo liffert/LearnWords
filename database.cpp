@@ -3,22 +3,18 @@
 Database::Database() {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(databaseName);    
-    if(db.open()){
-        QSqlQuery query;
-        if(db.tables().empty()){
-            create();
-            qDebug() << "Created new database";
-        }
+    if(!db.open()){
+        qDebug() << "Error on database opening";
     }
     else{
-        qDebug() << "Error on database opening";
+        selectAll();
     }
 }
 
-void Database::create() {
+void Database::createTable(QString name) {
     QSqlQuery query;
-    if(!query.exec("create table words (id integer primary key, word varchar(50), learned boolean)")){
-        qDebug() << "Error on create";
+    if(!query.exec("create table " + name + " (id integer primary key, word varchar(50), learned boolean)")){
+        qDebug() << "Error on create " << query.lastError();;
     }
 
     QFile file(filename);
@@ -29,32 +25,36 @@ void Database::create() {
         for(int i = 0; i < 10; i++){
             QString word = file.readLine();
             word.remove(word.length() - 1, 1);
-            insert(i, word, false);
+            insert(i, word, false, name);
         }
     }
 }
 
-void Database::insert(int id, QString word, bool learned) {
+void Database::insert(int id, QString word, bool learned, QString table) {
     QSqlQuery query;
-    query.prepare("INSERT INTO words values (:id, :word, :learned)");
+    query.prepare("INSERT INTO " + table + " values (:id, :word, :learned)");
     query.bindValue(":id", id);
     query.bindValue(":word", word);
     query.bindValue(":learned", learned);
     if(!query.exec()) {
-        qDebug() << "Error on insert";
+        qDebug() << "Error on insert " << query.lastError();
     }
 }
 
-QString Database::getWord() {
-    auto word = selectDidntLearn();
-    checkLearned(word.id);
+QString Database::getWord(QString table) {
+    auto word = selectDidntLearn(table);
+    checkLearned(word.id, table);
     return word.word;
 }
 
-Database::Word Database::selectDidntLearn() {
+QStringList Database::getTables() const {
+    return db.tables();
+}
+
+Database::Word Database::selectDidntLearn(QString table) {
     Word word;
     QSqlQuery query;
-    if(!query.exec("SELECT * from words WHERE Learned = false LIMIT 1")) {
+    if(!query.exec("SELECT * from " + table + " WHERE Learned = false LIMIT 1")) {
         qDebug() << "Error in func " << __FUNCSIG__;
         qDebug() << query.lastError();
     }
@@ -67,9 +67,9 @@ Database::Word Database::selectDidntLearn() {
     return word;
 }
 
-void Database::checkLearned(int id) {
+void Database::checkLearned(int id, QString table) {
     QSqlQuery query;
-    query.prepare("update words set Learned = true where Id = ?");
+    query.prepare("update " + table + " set Learned = true where Id = ?");
     query.addBindValue(id);
     if(!query.exec()){
         qDebug() << query.lastError();
@@ -78,12 +78,15 @@ void Database::checkLearned(int id) {
 
 void Database::selectAll() {
     QSqlQuery query;
-    if(!query.exec("select * from words")){
-        qDebug() << "Error on select";
-    }
-    while (query.next()){
-        qDebug() << "Id: " << query.value(0).toInt();
-        qDebug() << "Word: " << query.value(1).toString();
-        qDebug() << "Learned: " << query.value(2).toString();
+    for(const auto &iter : db.tables()){
+        qDebug() << iter;
+        if(!query.exec("select * from " + iter)){
+            qDebug() << "Error on select " << query.lastError();;
+        }
+        while (query.next()){
+            qDebug() << "Id: " << query.value(0).toInt();
+            qDebug() << "Word: " << query.value(1).toString();
+            qDebug() << "Learned: " << query.value(2).toString();
+        }
     }
 }
