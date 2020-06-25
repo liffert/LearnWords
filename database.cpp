@@ -7,12 +7,38 @@ Database::Database() {
         qDebug() << "Error on database opening";
     }
     else{
-        selectAll();
+        auto tables = db.tables();
+        if(std::find(tables.begin(), tables.end(), "Stopped") == tables.end()){
+            QSqlQuery query;
+            if(!query.exec("create table Stopped (id varchar(50) primary key)")){
+                qDebug() << "Error on create stoppend table " << query.lastError();
+            }
+        }
     }
 }
 
 void Database::createTable(QString name) {
     QSqlQuery query;
+    if(!query.exec("SELECT * FROM Stopped")){
+        qDebug() << "Error on check in stopped" << query.lastError();
+        return;
+    }
+    else{
+        while(query.next()){
+            if(query.value(0).toString() == name){
+                query.prepare("DELETE FROM Stopped WHERE id = ?");
+                query.addBindValue(name);
+                if(!query.exec()){
+                    qDebug() << "Error on delete" << query.lastError();
+                }
+            }
+            return;
+        }
+        auto tables = db.tables();
+        if(std::find(tables.begin(), tables.end(), name) != tables.end()){
+            return;
+        }
+    }
     if(!query.exec("create table " + name + " (id integer primary key, word varchar(50), learned boolean)")){
         qDebug() << "Error on create " << query.lastError();;
     }
@@ -27,6 +53,26 @@ void Database::createTable(QString name) {
             word.remove(word.length() - 1, 1);
             insert(i, word, false, name);
         }
+    }
+}
+
+void Database::stop(QString name) {
+    QSqlQuery query;
+    if(!query.exec("SELECT * FROM Stopped")){
+        qDebug() << "Error on delete" << query.lastError();
+    }
+    else{
+        while(query.next()){
+            if(query.value(0).toString() == name){
+                return;
+            }
+        }
+        query.prepare("INSERT INTO Stopped values (:id)");
+        query.bindValue(":id", name);
+        if(!query.exec()){
+            qDebug() << "Errro on insert in stopped " << query.lastError();
+        }
+        
     }
 }
 
@@ -48,7 +94,21 @@ QString Database::getWord(QString table) {
 }
 
 QStringList Database::getTables() const {
-    return db.tables();
+    QSqlQuery query;
+    QStringList tables;
+    for(const auto &iter : db.tables()){
+        query.prepare("SELECT * FROM Stopped WHERE id = ?");
+        query.addBindValue(iter);
+        if(!query.exec()){
+            qDebug () << "Error on select from stopped where " << query.lastError();
+        }
+        else{
+            if(!query.next() && iter != "Stopped"){
+                tables.push_back(iter);
+            }
+        }
+    }
+    return tables;
 }
 
 Database::Word Database::selectDidntLearn(QString table) {

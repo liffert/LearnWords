@@ -1,6 +1,5 @@
 #pragma once
 #include <QtSQL>
-
 class Database {
 private:
     struct wordline {
@@ -24,6 +23,7 @@ private:
     void checkLearned(int id, QString table);    
 public:   
     void createTable(QString name);
+    void stop(QString name);
     void selectAll();
     Database();
 };
