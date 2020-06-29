@@ -5,7 +5,7 @@ private:
     struct wordline {
         QString word;
         int id;
-        bool learned;
+        int learned;
     };
 public:
     const QString tablePref = "T";
@@ -13,14 +13,16 @@ public:
     using Word = struct wordline;
 private:
     QSqlDatabase db;
-public:
     Word selectDidntLearn(QString table);
+    Word selectLearnedWord(QString table);
+public:
     QString getWord(QString table);   
+    QString getLearnedWord(QString table);
 private:
-    void insert(int id, QString word, bool learned, QString table);
+    void insert(int id, QString word, int learned, QString table);
     QString databaseName = "db.LearnWordsBase";
     QString filename = "data.txt";
-    void checkLearned(int id, QString table);    
+    void updateLearnLevel(int id, int prewLevel, QString table);    
 public:   
     void createTable(QString name);
     void stop(QString name);

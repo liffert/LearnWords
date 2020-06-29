@@ -48,10 +48,10 @@ void Database::createTable(QString name) {
         qDebug() << "Can`t open file";
     }
     else{
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < 100; i++){
             QString word = file.readLine();
             word.remove(word.length() - 1, 1);
-            insert(i, word, false, name);
+            insert(i, word, 0, name);
         }
     }
 }
@@ -76,7 +76,7 @@ void Database::stop(QString name) {
     }
 }
 
-void Database::insert(int id, QString word, bool learned, QString table) {
+void Database::insert(int id, QString word, int learned, QString table) {
     QSqlQuery query;
     query.prepare("INSERT INTO " + table + " values (:id, :word, :learned)");
     query.bindValue(":id", id);
@@ -89,7 +89,13 @@ void Database::insert(int id, QString word, bool learned, QString table) {
 
 QString Database::getWord(QString table) {
     auto word = selectDidntLearn(table);
-    checkLearned(word.id, table);
+    updateLearnLevel(word.id, word.learned, table);
+    return word.word;
+}
+
+QString Database::getLearnedWord(QString table) {
+    auto word = selectLearnedWord(table);
+    updateLearnLevel(word.id, word.learned, table);
     return word.word;
 }
 
@@ -114,7 +120,7 @@ QStringList Database::getTables() const {
 Database::Word Database::selectDidntLearn(QString table) {
     Word word;
     QSqlQuery query;
-    if(!query.exec("SELECT * from " + table + " WHERE Learned = false LIMIT 1")) {
+    if(!query.exec("SELECT * from " + table + " WHERE Learned = 0 LIMIT 1")) {
         qDebug() << "Error in func " << __FUNCSIG__;
         qDebug() << query.lastError();
     }
@@ -122,14 +128,32 @@ Database::Word Database::selectDidntLearn(QString table) {
         query.next();
         word.id = query.value(0).toInt();
         word.word = query.value(1).toString();
-        word.learned = query.value(2).toBool();
+        word.learned = query.value(2).toInt();
     }
     return word;
 }
 
-void Database::checkLearned(int id, QString table) {
+Database::Word Database::selectLearnedWord(QString table) {
+    Word word;
     QSqlQuery query;
-    query.prepare("update " + table + " set Learned = true where Id = ?");
+    query.prepare("SELECT * FROM " + table + " WHERE Learned > 0 ORDER BY Learned LIMIT 1");
+    if(!query.exec()){
+        qDebug() << "Error in func " << __FUNCSIG__;
+        qDebug() << query.lastError();
+    }
+    else {
+        query.next();
+        word.id = query.value(0).toInt();
+        word.word = query.value(1).toString();
+        word.learned = query.value(2).toInt();
+    }
+    return word;
+}
+
+void Database::updateLearnLevel(int id, int prewLevel, QString table) {
+    QSqlQuery query;
+    query.prepare("update " + table + " set Learned = ? where Id = ?");
+    query.addBindValue(prewLevel + 1);
     query.addBindValue(id);
     if(!query.exec()){
         qDebug() << query.lastError();
@@ -146,7 +170,7 @@ void Database::selectAll() {
         while (query.next()){
             qDebug() << "Id: " << query.value(0).toInt();
             qDebug() << "Word: " << query.value(1).toString();
-            qDebug() << "Learned: " << query.value(2).toString();
+            qDebug() << "Learned: " << query.value(2).toInt();
         }
     }
 }
