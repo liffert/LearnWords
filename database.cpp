@@ -96,6 +96,7 @@ QString Database::getWord(QString table) {
 QString Database::getLearnedWord(QString table) {
     auto word = selectLearnedWord(table);
     updateLearnLevel(word.id, word.learned, table);
+    minLearnedLevel = word.learned;
     return word.word;
 }
 
@@ -120,7 +121,7 @@ QStringList Database::getTables() const {
 Database::Word Database::selectDidntLearn(QString table) {
     Word word;
     QSqlQuery query;
-    if(!query.exec("SELECT * from " + table + " WHERE Learned = 0 LIMIT 1")) {
+    if(!query.exec("SELECT * from " + table + " ORDER BY Learned LIMIT 1")) {
         qDebug() << "Error in func " << __FUNCSIG__;
         qDebug() << query.lastError();
     }
@@ -136,7 +137,8 @@ Database::Word Database::selectDidntLearn(QString table) {
 Database::Word Database::selectLearnedWord(QString table) {
     Word word;
     QSqlQuery query;
-    query.prepare("SELECT * FROM " + table + " WHERE Learned > 0 ORDER BY Learned LIMIT 1");
+    query.prepare("SELECT * FROM " + table + " WHERE Learned > ? ORDER BY Learned LIMIT 1");
+    query.addBindValue(minLearnedLevel);
     if(!query.exec()){
         qDebug() << "Error in func " << __FUNCSIG__;
         qDebug() << query.lastError();

@@ -22,7 +22,8 @@ private:
     void insert(int id, QString word, int learned, QString table);
     QString databaseName = "db.LearnWordsBase";
     QString filename = "data.txt";
-    void updateLearnLevel(int id, int prewLevel, QString table);    
+    void updateLearnLevel(int id, int prewLevel, QString table);
+    int minLearnedLevel = 0;    
 public:   
     void createTable(QString name);
     void stop(QString name);
