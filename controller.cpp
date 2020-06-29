@@ -8,7 +8,7 @@ Controller::Controller(std::string telegramSettingsPath, std::string TranslatorS
 }
 
 void Controller::startWorkingDay() {
-    const QTime whenEnd(21, 0, 0, 0);
+    const QTime whenEnd(23, 0, 0, 0);
     const QTime whenStart(10, 0, 0, 0);
     
     auto startWork = std::chrono::system_clock::now();
@@ -67,14 +67,14 @@ void Controller::sendWords() {
     QStringList tables = database->getTables();
     for(const auto &iter : tables){
         QString word = database->getWord(iter);
-        telegram->pushMessage(iter.mid(1, iter.length()), word + " it is " + translator->getReply(word));
+        telegram->pushMessage(iter.mid(1, iter.length()), word + " it is\n" + translator->getReply(word));
     }
 }
 
 void Controller::sendLearnedWords() {
     QStringList tables = database->getTables();
-    for(const auto &iter : tables){
+    for(const auto &iter : tables) {
         QString word = database->getLearnedWord(iter);
-        telegram->pushMessage(iter.mid(1, iter.length()), word + " it is " + translator->getReply(word));
+        telegram->pushMessage(iter.mid(1, iter.length()), word + " it is\n" + translator->getReply(word));
     }
 }
