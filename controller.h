@@ -17,7 +17,11 @@ private:
 
 public:
     Controller(std::string telegramSettingsPath, std::string TranslatorSettingsPath);
-    void startWorkingDay();
+private:
     void updatesProcessing();
+    void sendWords();
+    void sendLearnedWords();
+public:
+    void startWorkingDay();
 };
 
