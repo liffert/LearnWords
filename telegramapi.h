@@ -8,7 +8,13 @@ class TelegramApi {
 private:
     QNetworkAccessManager *manager;
 public:
-    std::vector<std::pair<QString, QString>> TelegramApi::getMessages() const;
+    struct messageStruct{
+        QString user;
+        QString updateId;
+        QString message;
+    };
+    using Message = struct messageStruct;
+    std::vector<Message> TelegramApi::getMessages() const;
 private:
     QByteArray getRequestBody(QString chat_id, QString message);
     QUrl URL;

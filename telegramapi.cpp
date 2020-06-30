@@ -14,13 +14,14 @@ TelegramApi::TelegramApi(std::string requestConfPath) {
     manager = new QNetworkAccessManager();
 }
 
-std::vector<std::pair<QString, QString>> TelegramApi::getMessages() const {
+std::vector<TelegramApi::Message> TelegramApi::getMessages() const {
     QJsonDocument doc = QJsonDocument::fromJson(getUpdate());
-    std::vector<std::pair<QString, QString>> messages;
+    std::vector<Message> messages;
     for(int i = 0; i < doc["result"].toArray().size(); i++){
         QString id = QString::number(doc["result"][i]["message"]["chat"]["id"].toInt());
         QString text = doc["result"][i]["message"]["text"].toString();
-        messages.push_back(std::make_pair(id, text));       
+        QString updateId = QString::number(doc["result"][i]["update_id"].toInt());
+        messages.push_back({id, updateId, text});       
     }
     return messages;
 }
