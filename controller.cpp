@@ -8,8 +8,10 @@ Controller::Controller(std::string telegramSettingsPath, std::string TranslatorS
 }
 
 void Controller::startWorkingDay() {
-    const QTime whenEnd(23, 0, 0, 0);
+    const QTime whenEnd(21, 0, 0, 0);
     const QTime whenStart(10, 0, 0, 0);
+    
+    QTime time;
     
     auto startWork = std::chrono::system_clock::now();
     bool start = false;
@@ -44,21 +46,38 @@ void Controller::startWorkingDay() {
 
 void Controller::updatesProcessing() {
     auto messages = telegram->getMessages();
+    for(const auto &iter : updates) {
+        auto iterator = std::remove_if(messages.begin(), messages.end(), [&iter](auto first){
+            return (first.user == iter.first && first.updateId == iter.second);
+        });
+        messages.erase(iterator, messages.end());
+    }
     if(!messages.empty()){
-        QStringList toStop;
-        auto tables = database->getTables();    
+        auto tables = database->getTables();
         for(auto iter = messages.begin(); iter != messages.end(); iter++){
-            if(iter->second == "/start"){
-                database->createTable(database->tablePref + iter->first);
-                auto temp = std::remove(toStop.begin(), toStop.end(), iter->first);
-                toStop.erase(temp, toStop.end());
+            if(iter->message == "/start"){
+                database->createTable(database->tablePref + iter->user);
+                updates.push_back(std::make_pair(iter->user, iter->updateId));
             }
-            else if(iter->second == "/stop"){
-                toStop.push_back(iter->first);
+            else if(iter->message == "/stop"){
+                database->stop(database->tablePref + iter->user);
+                updates.push_back(std::make_pair(iter->user, iter->updateId));
             }
-        }
-        for(const auto &iter : toStop){
-            database->stop(database->tablePref + iter);
+            else{
+                
+            auto command = iter->message.split(" ");
+                if(command.length() == 2){
+                    if(command.at(0) == "/add"){
+                        if(database->addWord(command.at(1), database->tablePref + iter->user)){
+                            telegram->pushMessage(iter->user, "Succesfull add word " + command.at(1));
+                        }
+                        else{
+                            telegram->pushMessage(iter->user, "Word " + command.at(1) + " is exist");
+                        }
+                    }
+                    updates.push_back(std::make_pair(iter->user, iter->updateId));
+                }
+            }
         }
     }
 }

@@ -7,6 +7,7 @@
 #include <QTime>
 #include <chrono>
 #include <memory>
+#include <algorithm>
 
 class Controller {
 private:
@@ -14,6 +15,7 @@ private:
    std::unique_ptr<TranslatorApi> translator = nullptr;
    std::unique_ptr<TelegramApi> telegram = nullptr;
    static constexpr unsigned short int interval = 1;
+   std::vector<std::pair<QString, QString>> updates;
 
 public:
     Controller(std::string telegramSettingsPath, std::string TranslatorSettingsPath);
