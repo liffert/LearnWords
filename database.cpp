@@ -76,6 +76,7 @@ void Database::stop(QString name) {
     }
 }
 
+
 void Database::insert(int id, QString word, int learned, QString table) {
     QSqlQuery query;
     query.prepare("INSERT INTO " + table + " values (:id, :word, :learned)");
@@ -98,6 +99,24 @@ QString Database::getLearnedWord(QString table) {
     updateLearnLevel(word.id, word.learned, table);
     minLearnedLevel = word.learned;
     return word.word;
+}
+
+bool Database::addWord(QString word, QString table) {
+    QSqlQuery query;
+    query.prepare("SELECT * FROM " + table + " WHERE word = ?");
+    query.addBindValue(word);
+    if(!query.exec()){
+        qDebug() << __FUNCSIG__ << query.lastError();
+    }
+    if(query.next()){ return false; }
+    
+    query.clear();
+    if(!query.exec("SELECT COUNT(*) FROM " + table)){
+        qDebug() << __FUNCSIG__ << query.lastError();
+    }
+    query.next();
+    insert(query.value(0).toInt() + 1, word, 0, table);
+    return true;
 }
 
 QStringList Database::getTables() const {

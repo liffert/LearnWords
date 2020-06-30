@@ -16,6 +16,7 @@ private:
     Word selectDidntLearn(QString table);
     Word selectLearnedWord(QString table);
 public:
+    bool addWord(QString word, QString table);
     QString getWord(QString table);   
     QString getLearnedWord(QString table);
 private:
