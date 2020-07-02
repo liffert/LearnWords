@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
-    Controller controller("telegramkey.txt", "TranslatorApiSettings.csv");
+    Controller controller("telegramkey.txt", "TranslatorApiSettings.csv", "data.txt", "db.LearnWordsBase");
     controller.startWorkingDay();
     
     return a.exec();
