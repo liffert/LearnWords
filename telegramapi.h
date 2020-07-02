@@ -16,12 +16,12 @@ public:
     using Message = struct messageStruct;
     std::vector<Message> TelegramApi::getMessages() const;
 private:
-    QByteArray getRequestBody(QString chat_id, QString message);
+    QByteArray getRequestBody(const QString chat_id, const QString message) const;
     QUrl URL;
     QByteArray getUpdate() const;
     
 public:
-    TelegramApi(std::string requestConfPath);
-    bool pushMessage(QString chat_id, QString message);
+    TelegramApi(const std::string requestConfPath);
+    bool pushMessage(const QString chat_id, const QString message) const;
 };
 

@@ -8,16 +8,16 @@ class TranslatorApi {
 private:
     QNetworkAccessManager* manager;
     QMap<QByteArray, QByteArray> requestSettings;
-    std::pair<QByteArray, QByteArray> getCsvPair(std::string line);
-    QByteArray getRequestBody(QString word);
-    QString getTranslateFromJson(QJsonDocument reply);
+    std::pair<QByteArray, QByteArray> getCsvPair(const std::string line) const;
+    QByteArray getRequestBody(const QString word) const;
+    QString getTranslateFromJson(const QJsonDocument reply) const;
     QUrl URL;
     
-    void setHeaderFromConfigFile(std::string requestConfPath);
+    void setHeaderFromConfigFile(const std::string requestConfPath);
 public:
-    TranslatorApi(std::string requestConfPath);
+    TranslatorApi(const std::string requestConfPath);
 
-    QString getReply(QString word);
+    QString getReply(const QString word) const;
 
 };
 

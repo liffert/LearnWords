@@ -1,7 +1,7 @@
 #include "translatorapi.h"
 #include <fstream>
 
-TranslatorApi::TranslatorApi(std::string requestConfPath) {        
+TranslatorApi::TranslatorApi(const std::string requestConfPath) {        
     setHeaderFromConfigFile(requestConfPath);
 	manager = new QNetworkAccessManager();
 	URL.setUrl("https://learnwords.cognitiveservices.azure.com/translator/text/v3.0/translate?api-version=3.0&to=ru");
@@ -20,7 +20,7 @@ void TranslatorApi::setHeaderFromConfigFile(std::string requestConfPath) {
         }
     }
 }
-std::pair<QByteArray, QByteArray> TranslatorApi::getCsvPair(std::string line) {
+std::pair<QByteArray, QByteArray> TranslatorApi::getCsvPair(const std::string line) const {
     std::string first;
     std::string second;
     bool flag = true;
@@ -35,7 +35,7 @@ std::pair<QByteArray, QByteArray> TranslatorApi::getCsvPair(std::string line) {
     return std::make_pair(QByteArray::fromStdString(first), QByteArray::fromStdString(second));
 }
 
-QByteArray TranslatorApi::getRequestBody(QString word) {
+QByteArray TranslatorApi::getRequestBody(const QString word) const {
 	QJsonArray arr;
 	QJsonObject json;
 	QJsonDocument doc;
@@ -47,13 +47,13 @@ QByteArray TranslatorApi::getRequestBody(QString word) {
 	return doc.toJson();
 }
 
-QString TranslatorApi::getTranslateFromJson(QJsonDocument reply) {
+QString TranslatorApi::getTranslateFromJson(const QJsonDocument reply) const {
     return reply.array().at(0).toObject()["translations"].toArray().at(0).toObject()["text"].toString();
 }
 
 
 
-QString TranslatorApi::getReply(QString word) {
+QString TranslatorApi::getReply(const QString word) const {
 	QNetworkRequest request(URL);
 
 	for (auto iter = requestSettings.begin(); iter != requestSettings.end(); iter++) {

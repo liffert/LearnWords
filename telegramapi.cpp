@@ -1,7 +1,7 @@
 #include "telegramapi.h"
 #include <fstream>
 
-TelegramApi::TelegramApi(std::string requestConfPath) {
+TelegramApi::TelegramApi(const std::string requestConfPath) {
     std::ifstream settingsFile(requestConfPath);
     if(!settingsFile.is_open()){
          qDebug() << "Warning. Settings file doesn`t exist";
@@ -25,7 +25,7 @@ std::vector<TelegramApi::Message> TelegramApi::getMessages() const {
     }
     return messages;
 }
-QByteArray TelegramApi::getRequestBody(QString chat_id, QString message) {
+QByteArray TelegramApi::getRequestBody(const QString chat_id, const QString message) const {
     QJsonObject json;
     QJsonDocument doc;
     json.insert("chat_id", chat_id);
@@ -46,7 +46,7 @@ QByteArray TelegramApi::getUpdate() const {
 }
 
 
-bool TelegramApi::pushMessage(QString chat_id, QString message) {
+bool TelegramApi::pushMessage(const QString chat_id, const QString message) const {
     QNetworkRequest request(URL.url() + "sendMessage");
     request.setRawHeader("Content-Type", "application/json");
     QNetworkReply *reply = manager->post(request, getRequestBody(chat_id, message));
