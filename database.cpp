@@ -163,10 +163,14 @@ Database::Word Database::selectLearnedWord(const QString table) {
         qDebug() << query.lastError();
     }
     else {
-        query.next();
-        word.id = query.value(0).toInt();
-        word.word = query.value(1).toString();
-        word.learned = query.value(2).toInt();
+        if(query.next()){    
+            word.id = query.value(0).toInt();
+            word.word = query.value(1).toString();
+            word.learned = query.value(2).toInt();
+        }
+        else{
+            return selectDidntLearn(table);
+        }
     }
     return word;
 }
