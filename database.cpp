@@ -1,6 +1,6 @@
 #include "database.h"
 
-Database::Database() {
+Database::Database(const QString dbname, const QString dataPath) :databaseName(dbname), filename(dataPath) {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(databaseName);    
     if(!db.open()){
@@ -17,7 +17,7 @@ Database::Database() {
     }
 }
 
-void Database::createTable(QString name) {
+void Database::createTable(const QString name) {
     QSqlQuery query;
     if(!query.exec("SELECT * FROM Stopped")){
         qDebug() << "Error on check in stopped" << query.lastError();
@@ -56,7 +56,7 @@ void Database::createTable(QString name) {
     }
 }
 
-void Database::stop(QString name) {
+void Database::stop(const QString name) {
     QSqlQuery query;
     if(!query.exec("SELECT * FROM Stopped")){
         qDebug() << "Error on delete" << query.lastError();
@@ -77,7 +77,7 @@ void Database::stop(QString name) {
 }
 
 
-void Database::insert(int id, QString word, int learned, QString table) {
+void Database::insert(const int id, const QString word, const int learned, const QString table) {
     QSqlQuery query;
     query.prepare("INSERT INTO " + table + " values (:id, :word, :learned)");
     query.bindValue(":id", id);
@@ -88,20 +88,20 @@ void Database::insert(int id, QString word, int learned, QString table) {
     }
 }
 
-QString Database::getWord(QString table) {
+QString Database::getWord(const QString table) {
     auto word = selectDidntLearn(table);
     updateLearnLevel(word.id, word.learned, table);
     return word.word;
 }
 
-QString Database::getLearnedWord(QString table) {
+QString Database::getLearnedWord(const QString table) {
     auto word = selectLearnedWord(table);
     updateLearnLevel(word.id, word.learned, table);
     minLearnedLevel = word.learned;
     return word.word;
 }
 
-bool Database::addWord(QString word, QString table) {
+bool Database::addWord(const QString word, const QString table) {
     QSqlQuery query;
     query.prepare("SELECT * FROM " + table + " WHERE word = ?");
     query.addBindValue(word);
@@ -137,7 +137,7 @@ QStringList Database::getTables() const {
     return tables;
 }
 
-Database::Word Database::selectDidntLearn(QString table) {
+Database::Word Database::selectDidntLearn(const QString table) {
     Word word;
     QSqlQuery query;
     if(!query.exec("SELECT * from " + table + " ORDER BY Learned LIMIT 1")) {
@@ -153,7 +153,7 @@ Database::Word Database::selectDidntLearn(QString table) {
     return word;
 }
 
-Database::Word Database::selectLearnedWord(QString table) {
+Database::Word Database::selectLearnedWord(const QString table) {
     Word word;
     QSqlQuery query;
     query.prepare("SELECT * FROM " + table + " WHERE Learned > ? ORDER BY Learned LIMIT 1");
@@ -171,7 +171,7 @@ Database::Word Database::selectLearnedWord(QString table) {
     return word;
 }
 
-void Database::updateLearnLevel(int id, int prewLevel, QString table) {
+void Database::updateLearnLevel(const int id, const int prewLevel, const QString table) {
     QSqlQuery query;
     query.prepare("update " + table + " set Learned = ? where Id = ?");
     query.addBindValue(prewLevel + 1);

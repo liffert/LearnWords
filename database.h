@@ -13,22 +13,24 @@ public:
     using Word = struct wordline;
 private:
     QSqlDatabase db;
-    Word selectDidntLearn(QString table);
-    Word selectLearnedWord(QString table);
+    Word selectDidntLearn(const QString table);
+    Word selectLearnedWord(const QString table);
 public:
-    bool addWord(QString word, QString table);
-    QString getWord(QString table);   
-    QString getLearnedWord(QString table);
+    bool addWord(const QString word, const QString table);
+    QString getWord(const QString table);   
+    QString getLearnedWord(const QString table);
 private:
-    void insert(int id, QString word, int learned, QString table);
-    QString databaseName = "db.LearnWordsBase";
-    QString filename = "data.txt";
-    void updateLearnLevel(int id, int prewLevel, QString table);
-    int minLearnedLevel = 0;    
+    void insert(const int id, const QString word, const int learned, const QString table);
+    QString databaseName;
+    QString filename;
+    void updateLearnLevel(const int id, const int prewLevel, const QString table);
 public:   
-    void createTable(QString name);
-    void stop(QString name);
+    Database(const QString dbname, const QString dataPath);
+    void createTable(const QString name);
+    void stop(const QString name);
+private:
+    int minLearnedLevel = 0;    
+public:
     void selectAll();
-    Database();
 };
 
