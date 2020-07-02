@@ -1,8 +1,8 @@
 #include "controller.h"
 
-Controller::Controller(std::string telegramSettingsPath, std::string TranslatorSettingsPath) {
+Controller::Controller(const std::string telegramSettingsPath, const std::string TranslatorSettingsPath, const QString dataPath, const QString dbname) {
     translator = std::make_unique<TranslatorApi>(TranslatorSettingsPath);
-    database = std::make_unique<Database>();
+    database = std::make_unique<Database>(dbname, dataPath);
     telegram = std::make_unique<TelegramApi>(telegramSettingsPath);
     
 }
@@ -82,7 +82,7 @@ void Controller::updatesProcessing() {
     }
 }
 
-void Controller::sendWords() {
+void Controller::sendWords() const {
     QStringList tables = database->getTables();
     for(const auto &iter : tables){
         QString word = database->getWord(iter);
@@ -90,7 +90,7 @@ void Controller::sendWords() {
     }
 }
 
-void Controller::sendLearnedWords() {
+void Controller::sendLearnedWords() const {
     QStringList tables = database->getTables();
     for(const auto &iter : tables) {
         QString word = database->getLearnedWord(iter);

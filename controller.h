@@ -18,11 +18,11 @@ private:
    std::vector<std::pair<QString, QString>> updates;
 
 public:
-    Controller(std::string telegramSettingsPath, std::string TranslatorSettingsPath);
+    Controller(const std::string telegramSettingsPath, const std::string TranslatorSettingsPath, const QString dataPath , const QString dbname);
 private:
     void updatesProcessing();
-    void sendWords();
-    void sendLearnedWords();
+    void sendWords() const;
+    void sendLearnedWords() const;
 public:
     void startWorkingDay();
 };
